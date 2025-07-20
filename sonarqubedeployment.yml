@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqubedeployment
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      name: sonarqubepod
+      labels:
+        app: sonarqube
+    spec:
+      containers:
+        - name: sonarqubecontainer
+          image: sonarqube:lts  
+          ports:
+            - containerPort: 9000
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          volumeMounts:
+            - name: sonarqube-data
+              mountPath: /opt/sonarqube/data
+      volumes:
+        - name: sonarqube-data
+          emptyDir: {}  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarqubesvc
+spec:
+  type: NodePort
+  selector:
+    app: sonarqube
+  ports:
+    - port: 80
+      targetPort: 9000
+      nodePort: 32613
